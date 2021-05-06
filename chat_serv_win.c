@@ -3,7 +3,7 @@
 #include <string.h>
 #include <windows.h>
 #include <process.h> 
-//test
+
 #define BUF_SIZE 100
 #define MAX_CLNT 256
 
@@ -12,8 +12,8 @@ void SendMsg(char * msg, int len);
 void ErrorHandling(char * msg);
 
 int clntCnt=0;
-SOCKET clntSocks[MAX_CLNT];//..
-int clntCnt=0;	//comment test by kim doo yeong
+SOCKET clntSocks[MAX_CLNT];
+int clntCnt=0;	
 SOCKET clntSocks[MAX_CLNT];
 HANDLE hMutex;
 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family=AF_INET; 
 	servAdr.sin_addr.s_addr=htonl(INADDR_ANY);
-	servAdr.sin_port=htons(atoi(argv[1]));
+	servAdr.sin_port=htons(atoi("10000"));
 	
 	if(bind(hServSock, (SOCKADDR*) &servAdr, sizeof(servAdr))==SOCKET_ERROR)
 		ErrorHandling("bind() error");
