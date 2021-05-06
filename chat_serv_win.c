@@ -12,7 +12,7 @@ void SendMsg(char * msg, int len);
 void ErrorHandling(char * msg);
 
 int clntCnt=0;
-SOCKET clntSocks[MAX_CLNT];
+SOCKET clntSocks[MAX_CLNT];//..
 HANDLE hMutex;
 
 int main(int argc, char *argv[])
