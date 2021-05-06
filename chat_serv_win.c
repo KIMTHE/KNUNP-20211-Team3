@@ -11,7 +11,7 @@ unsigned WINAPI HandleClnt(void * arg);
 void SendMsg(char * msg, int len);
 void ErrorHandling(char * msg);
 
-int clntCnt=0;
+int clntCnt=0;	//comment test
 SOCKET clntSocks[MAX_CLNT];
 HANDLE hMutex;
 
