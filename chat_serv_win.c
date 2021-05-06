@@ -13,8 +13,6 @@ void ErrorHandling(char * msg);
 
 int clntCnt=0;
 SOCKET clntSocks[MAX_CLNT];
-int clntCnt=0;	
-SOCKET clntSocks[MAX_CLNT];
 HANDLE hMutex;
 
 int main(int argc, char *argv[])
@@ -24,10 +22,10 @@ int main(int argc, char *argv[])
 	SOCKADDR_IN servAdr, clntAdr;
 	int clntAdrSz;
 	HANDLE  hThread;
-	if(argc!=2) {
-		printf("Usage : %s <port>\n", argv[0]);
-		exit(1);
-	}
+	//if(argc!=2) {
+	//	printf("Usage : %s <port>\n", argv[0]);
+	//	exit(1);
+	//}
 	if(WSAStartup(MAKEWORD(2, 2), &wsaData)!=0)
 		ErrorHandling("WSAStartup() error!"); 
   
