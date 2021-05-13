@@ -129,7 +129,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
     DWORD bytesTrans;
     LPPER_HANDLE_DATA handleInfo;
     LPPER_IO_DATA ioInfo;
-    int flags = 0;
+    int flags = 0, i, j;
     CHAR message[BUF_SIZE];
 
     while (1)
@@ -142,54 +142,54 @@ unsigned __stdcall ThreadMain(void* pComPort)
         // 첫 시작은 읽기 상태
         if (ioInfo->rwMode == READ)
         {
-            puts("\nmessage received!");
-            if (bytesTrans == 0)
+            //puts("\nmessage received!");
+            if (bytesTrans == 0) //로그아웃시
             {
-                erase_lock.lock();
-                std::vector<LPPER_HANDLE_DATA>::iterator iter;
-                for (iter = UserList.begin(); iter != UserList.end(); ++iter) {
-                    if ((*iter)->hClntSock == sock) {
-                        std::cout << "Logout >> "
-                            << "IP :" << (*iter)->ip << ", "
-                            << "Sock :" << (*iter)->hClntSock << ", "
-                            << "name :" << (*iter)->name << '\n';
-                        UserList.erase(iter);
-                        std::cout << ++logout_count << '\n';
+                //erase_lock.lock();
+                for (i = 0; i < user_num;i++)
+                {
+                    if (UserList[i]->hClntSock == sock) 
+                    {
+                        printf("name : %s가 로그아웃함\n", UserList[i]->name);
+                        for (j = i + 1; j <= user_num; j++) {
+                            UserList[j - 1] = UserList[j];
+                        }
+                        user_num--;
                         break;
                     }
                 }
                 closesocket(sock);
                 free(handleInfo);
                 free(ioInfo);
-                erase_lock.unlock();
+                //erase_lock.unlock();
                 continue;
             }
             memcpy(message, ioInfo->wsaBuf.buf, BUF_SIZE);
             message[bytesTrans] = '\0';            // 문자열의 끝에 \0을 추가한다 (쓰레기 버퍼 방지)
 
              //name 나누기
-            char *ptr = strtok(message, "]");    // [] => ']'기준으로 나눈다.
-            strcpy_s(handleInfo->name, ptr + 1);    // ]으로 나눈 name
-            ptr = strtok(NULL, "]");            // ]으로 다시 나눈 message
-            strcpy_s(message, ptr);                // message와 name이 나누어진다.
+            //char *ptr = strtok(message, "]");    // [] => ']'기준으로 나눈다.
+            //strcpy(handleInfo->name, ptr + 1);    // ]으로 나눈 name
+            //ptr = strtok(NULL, "]");            // ]으로 다시 나눈 message
+            //strcpy(message, ptr);                // message와 name이 나누어진다.
             
-            printf("name : %s\n", handleInfo->name);
-            printf("Sock[%d] : %s\n", sock, message);
+            printf("%s\n", message);
+            //printf("Sock[%d] : %s\n", sock, message);
 
             // 클라이언트가 가진 데이터 구조체의 정보를 바꾼다.
             // 이젠 서버가 쓰기를 행함
-            std::vector<LPPER_HANDLE_DATA>::iterator iter;
-
             free(ioInfo);
 
-            for (iter = UserList.begin(); iter != UserList.end(); ++iter) {
+            for (i=0; i<user_num; i++) 
+            {
                 ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
                 memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
                 int len = strlen(message);
                 ioInfo->wsaBuf.len = len;
-                strcpy_s(ioInfo->buffer, message);
+                strcpy(ioInfo->buffer, message);
                 ioInfo->wsaBuf.buf = ioInfo->buffer;
                 ioInfo->rwMode = WRITE;
+
                 if (bytesTrans == 0)
                 {
                     closesocket(sock);
@@ -198,12 +198,13 @@ unsigned __stdcall ThreadMain(void* pComPort)
                     continue;
                 }
 
-                if (WSASend((*iter)->hClntSock, &(ioInfo->wsaBuf), 1, &bytesTrans, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
+                if (WSASend(UserList[i]->hClntSock, &(ioInfo->wsaBuf), 1, &bytesTrans, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
                 {
                     if (WSAGetLastError() != WSA_IO_PENDING)
                         ErrorHandling("WSASend() error");
                 }
             }
+
             // 데이터 구조체 초기화, 쓰기 -> 읽기 모드로 변경
             ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
             memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
