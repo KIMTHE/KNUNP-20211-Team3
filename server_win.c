@@ -5,7 +5,7 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <Ws2tcpip.h> //inet_pton 
-#include <mutex>
+//#include <mutex>
 
 // vs warning and winsock error 
 #pragma comment(lib, "ws2_32.lib")
@@ -21,6 +21,13 @@ int PORT_NUM = 50000;
 #define CLIENT_SIZE 5
 int READ = 3;
 int WRITE = 5;
+
+char* code_start = "********************\n*******<code>*******\n";
+char* chat_start = "********************\n*******<chat>*******\n";
+char* end = "********************\n";
+
+char chat[20][100];
+char code[20][100];
 
 typedef struct    // socket info
 {
@@ -151,7 +158,8 @@ unsigned __stdcall ThreadMain(void* pComPort)
                     if (UserList[i]->hClntSock == sock) 
                     {
                         printf("name : %s가 로그아웃함\n", UserList[i]->name);
-                        for (j = i + 1; j <= user_num; j++) {
+                        for (j = i + 1; j <= user_num; j++) 
+                        {
                             UserList[j - 1] = UserList[j];
                         }
                         user_num--;
@@ -180,14 +188,11 @@ unsigned __stdcall ThreadMain(void* pComPort)
             // 이젠 서버가 쓰기를 행함
             free(ioInfo);
 
-            for (i=0; i<user_num; i++) 
+            for (i=0; i<user_num; i++) //클라이언트에 메시지 뿌림
             {
                 ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
                 memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
-                int len = strlen(message);
-                ioInfo->wsaBuf.len = len;
-                strcpy(ioInfo->buffer, message);
-                ioInfo->wsaBuf.buf = ioInfo->buffer;
+                
                 ioInfo->rwMode = WRITE;
 
                 if (bytesTrans == 0)
@@ -197,6 +202,11 @@ unsigned __stdcall ThreadMain(void* pComPort)
                     free(ioInfo);
                     continue;
                 }
+
+                int len = strlen(message);
+                ioInfo->wsaBuf.len = len;
+                strcpy(ioInfo->buffer, message);
+                ioInfo->wsaBuf.buf = ioInfo->buffer;
 
                 if (WSASend(UserList[i]->hClntSock, &(ioInfo->wsaBuf), 1, &bytesTrans, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
                 {
@@ -220,7 +230,8 @@ unsigned __stdcall ThreadMain(void* pComPort)
             }
         }
         // 쓰기 상태
-        else {
+        else 
+        {
             printf("Message Sent!\n");
             free(ioInfo);
         }

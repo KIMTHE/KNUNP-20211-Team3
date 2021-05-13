@@ -90,12 +90,13 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 		if (strLen == -1)
 			return -1;
 
-		if (strcmp(nameMsg, "********************") == 0) {
+		if (strcmp(nameMsg, "********************\n") == 0) {
 			count++;
 		}	//칸 구분 문자열 검사
 
 		if (count == 3) {
 			system("cls");
+			count = 0;
 		}	//3번 칸이 구분되면 화면 지우기
 
 		nameMsg[strLen] = 0;
