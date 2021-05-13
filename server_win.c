@@ -1,26 +1,21 @@
-#include <iostream>
+#include <stdio.h>
 #include <stdlib.h>
+#include<string.h>
 #include <process.h>
 #include <winsock2.h>
 #include <windows.h>
-#include <vector>
 #include <Ws2tcpip.h> //inet_pton 
 #include <mutex>
+
 // vs warning and winsock error 
 #pragma comment(lib, "ws2_32.lib")
 #pragma warning (disable : 4996)
 
-std::mutex push_lock;
-std::mutex erase_lock;
-std::mutex sock_lock;
-
-constexpr int PORT_NUM = 50000;
-constexpr int BUF_SIZE = 1024;
-constexpr int READ = 3;
-constexpr int WRITE = 5;
-constexpr int CLIENT_SIZE = 3000;
-int login_count = 0;
-int logout_count = 0;
+int PORT_NUM = 50000;
+#define BUF_SIZE 1024
+#define CLIENT_SIZE 5
+int READ = 3;
+int WRITE = 5;
 
 typedef struct    // socket info
 {
@@ -38,8 +33,9 @@ typedef struct    // buffer info
     INT rwMode;    // READ or WRITE
 } PER_IO_DATA, * LPPER_IO_DATA;
 
-// 클라이언트 통신을 위한 vector container
-std::vector<LPPER_HANDLE_DATA> UserList;
+// 유저리스트
+int user_num = 0;
+LPPER_HANDLE_DATA UserList[CLIENT_SIZE];
 
 void ErrorHandling(const char* message);
 unsigned __stdcall ThreadMain(void* CompletionPortIO);
@@ -81,30 +77,19 @@ int main(int argc, char* argv[])
 
     while (1)
     {
-        sock_lock.lock();
-
         SOCKET hClntSock;
         SOCKADDR_IN clntAdr;
         int addrLen = sizeof(clntAdr);
 
         hClntSock = accept(hServSock, (SOCKADDR*)&clntAdr, &addrLen);
 
-        sock_lock.unlock();
         handleInfo = (LPPER_HANDLE_DATA)malloc(sizeof(PER_HANDLE_DATA));        // LPPER_HANDLE_DATA 초기화
         inet_ntop(AF_INET, &clntAdr.sin_addr, handleInfo->ip, INET_ADDRSTRLEN);    // get new client ip
         handleInfo->hClntSock = hClntSock;                                // 클라이언트의 정보를 구조체에 담아 놓는다.
-        std::cout << ++login_count << '\n';
-        printf("New Client Access : %s\n", handleInfo->ip);
         memcpy(&(handleInfo->clntAdr), &clntAdr, addrLen);
 
         // 소켓 입출력 포트에 accept을 통해서 return 된 클라이언트 정보를 묶는다.
         CreateIoCompletionPort((HANDLE)hClntSock, hComPort, (DWORD)handleInfo, 0);
-
-        push_lock.lock();
-        // 클라이언트 user data 초기화
-        UserList.push_back(handleInfo);
-
-        push_lock.unlock();
 
         // 클라이언트가 가지게 될 data 초기화
         ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
@@ -116,6 +101,11 @@ int main(int argc, char* argv[])
 
         // name 받기
         recv(handleInfo->hClntSock, handleInfo->name, 20, 0);
+
+        // 클라이언트 user data 초기화
+        printf("새로운 유저가 입장했습니다 : %s, 현재 유저수 : %d\n", handleInfo->name, user_num + 1);
+        UserList[user_num] = handleInfo;
+
         // 비동기 입출력 시작
         WSARecv(handleInfo->hClntSock, &(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);
     }
@@ -167,12 +157,12 @@ unsigned __stdcall ThreadMain(void* pComPort)
             memcpy(message, ioInfo->wsaBuf.buf, BUF_SIZE);
             message[bytesTrans] = '\0';            // 문자열의 끝에 \0을 추가한다 (쓰레기 버퍼 방지)
 
-            /* name 나누기
+             //name 나누기
             char *ptr = strtok(message, "]");    // [] => ']'기준으로 나눈다.
             strcpy_s(handleInfo->name, ptr + 1);    // ]으로 나눈 name
             ptr = strtok(NULL, "]");            // ]으로 다시 나눈 message
             strcpy_s(message, ptr);                // message와 name이 나누어진다.
-            */
+            
             printf("name : %s\n", handleInfo->name);
             printf("Sock[%d] : %s\n", sock, message);
 
