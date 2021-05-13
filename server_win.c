@@ -5,7 +5,6 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <Ws2tcpip.h> //inet_pton 
-#include <mutex>
 
 // vs warning and winsock error 
 #pragma comment(lib, "ws2_32.lib")
@@ -182,7 +181,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
                 if (bytesTrans == 0)
                 {
-                    closesocket(sock);
+                    closesocket(sock); 
                     free(handleInfo);
                     free(ioInfo);
                     continue;
