@@ -6,6 +6,7 @@
 #include <vector>
 #include <Ws2tcpip.h> //inet_pton 
 #include <mutex>
+
 // vs warning and winsock error 
 #pragma comment(lib, "ws2_32.lib")
 #pragma warning (disable : 4996)
@@ -167,12 +168,12 @@ unsigned __stdcall ThreadMain(void* pComPort)
             memcpy(message, ioInfo->wsaBuf.buf, BUF_SIZE);
             message[bytesTrans] = '\0';            // 문자열의 끝에 \0을 추가한다 (쓰레기 버퍼 방지)
 
-            /* name 나누기
+             //name 나누기
             char *ptr = strtok(message, "]");    // [] => ']'기준으로 나눈다.
             strcpy_s(handleInfo->name, ptr + 1);    // ]으로 나눈 name
             ptr = strtok(NULL, "]");            // ]으로 다시 나눈 message
             strcpy_s(message, ptr);                // message와 name이 나누어진다.
-            */
+            
             printf("name : %s\n", handleInfo->name);
             printf("Sock[%d] : %s\n", sock, message);
 

@@ -23,9 +23,9 @@ int main(int argc, char *argv[])
 	printf("사용할 이름을 입력해주세요 : ");
 	scanf("%s", &user_name);
 	printf("접속할 서버주소를 입력해주세요 : ");
-	scanf("%s", &server_ip);
+	scanf(" %s", &server_ip);
 	printf("접속할 포트번호를 입력해주세요 : ");
-	scanf("%s", &port_num);
+	scanf(" %s", &port_num);
 
 	WSADATA wsaData;
 	SOCKET hSock;
