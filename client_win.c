@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 	scanf(" %s", &server_ip);
 	printf("접속할 포트번호를 입력해주세요 : ");
 	scanf(" %s", &port_num);
+	printf("\n\n");
 
 	WSADATA wsaData;
 	SOCKET hSock;
