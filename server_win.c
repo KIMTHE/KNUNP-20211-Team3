@@ -11,6 +11,11 @@
 #pragma comment(lib, "ws2_32.lib")
 #pragma warning (disable : 4996)
 
+//std::mutex push_lock;
+//std::mutex erase_lock;
+//std::mutex sock_lock;
+
+
 int PORT_NUM = 50000;
 #define BUF_SIZE 1024
 #define CLIENT_SIZE 5
@@ -77,12 +82,15 @@ int main(int argc, char* argv[])
 
     while (1)
     {
+
+        //sock_lock.lock();
         SOCKET hClntSock;
         SOCKADDR_IN clntAdr;
         int addrLen = sizeof(clntAdr);
 
         hClntSock = accept(hServSock, (SOCKADDR*)&clntAdr, &addrLen);
 
+        //sock_lock.unlock();
         handleInfo = (LPPER_HANDLE_DATA)malloc(sizeof(PER_HANDLE_DATA));        // LPPER_HANDLE_DATA 초기화
         inet_ntop(AF_INET, &clntAdr.sin_addr, handleInfo->ip, INET_ADDRSTRLEN);    // get new client ip
         handleInfo->hClntSock = hClntSock;                                // 클라이언트의 정보를 구조체에 담아 놓는다.
@@ -102,9 +110,11 @@ int main(int argc, char* argv[])
         // name 받기
         recv(handleInfo->hClntSock, handleInfo->name, 20, 0);
 
+        // push_lock.lock();
         // 클라이언트 user data 초기화
         printf("새로운 유저가 입장했습니다 : %s, 현재 유저수 : %d\n", handleInfo->name, user_num + 1);
-        UserList[user_num] = handleInfo;
+        UserList[user_num++] = handleInfo;
+        //push_lock.unlock();
 
         // 비동기 입출력 시작
         WSARecv(handleInfo->hClntSock, &(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);
