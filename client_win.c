@@ -98,7 +98,6 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 			system("cls");
 			count = 0;
 		}	//3번 칸이 구분되면 화면 지우기
-
 		nameMsg[strLen] = 0;
 		fputs(nameMsg, stdout);
 	}
