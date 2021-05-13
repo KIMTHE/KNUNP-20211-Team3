@@ -17,7 +17,7 @@ char msg[BUF_SIZE];
 int main(int argc, char *argv[])
 {
 	char server_ip[20];	//서버 ip 주소
-	int port_num;		//서버 포트 번호
+	char port_num[20];		//서버 포트 번호
 	char user_name[20];	//사용자 이름
 
 	printf("사용할 이름을 입력해주세요 : ");
