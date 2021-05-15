@@ -144,7 +144,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 {
     HANDLE hComPort = (HANDLE)pComPort;
     SOCKET sock;
-    DWORD bytesTrans, recvBytes,send_max = 5000;
+    DWORD bytesTrans;
     LPPER_HANDLE_DATA handleInfo;
     LPPER_IO_DATA ioInfo;
     int flags = 0, i, j, n;
@@ -218,11 +218,11 @@ unsigned __stdcall ThreadMain(void* pComPort)
                 
                 ioInfo->rwMode = WRITE;
 
-                int len = strlen(message);
+                int len = strlen(MES);
                 ioInfo->wsaBuf.len = len;
                 ioInfo->wsaBuf.buf = MES;
 
-                if (WSASend(UserList[i]->hClntSock, &(ioInfo->wsaBuf), 1, &send_max, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
+                if (WSASend(UserList[i]->hClntSock, &(ioInfo->wsaBuf), 1, &bytesTrans, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
                 {
                     if (WSAGetLastError() != WSA_IO_PENDING)
                         ErrorHandling("WSASend() error");
@@ -237,7 +237,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
             ioInfo->rwMode = READ;
 
             // 읽기 시작
-            if (WSARecv(sock, &(ioInfo->wsaBuf), 1, &recvBytes, (LPDWORD)&flags, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
+            if (WSARecv(sock, &(ioInfo->wsaBuf), 1, &bytesTrans, (LPDWORD)&flags, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
             {
                 if (WSAGetLastError() != WSA_IO_PENDING)
                     ErrorHandling("WSASend() error");
