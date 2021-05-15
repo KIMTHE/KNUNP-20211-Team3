@@ -30,6 +30,7 @@ char* end = "********************\n\n";
 
 char chat[20][100] = {"","","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" };
 char code[20][100] = {"","","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" };
+int count = 0;
 
 typedef struct    // socket info
 {
@@ -52,6 +53,8 @@ int user_num = 0;
 LPPER_HANDLE_DATA UserList[CLIENT_SIZE];
 
 void ErrorHandling(const char* message);
+char* MakeMessage();
+void Insertchat(char* M);
 unsigned __stdcall ThreadMain(void* CompletionPortIO);
 
 int main(int argc, char* argv[])
@@ -99,6 +102,12 @@ int main(int argc, char* argv[])
 
         hClntSock = accept(hServSock, (SOCKADDR*)&clntAdr, &addrLen);
 
+        if (user_num >= 4)
+        {
+            closesocket(hClntSock);
+            continue;
+        }
+
         //sock_lock.unlock();
         handleInfo = (LPPER_HANDLE_DATA)malloc(sizeof(PER_HANDLE_DATA));        // LPPER_HANDLE_DATA 초기화
         inet_ntop(AF_INET, &clntAdr.sin_addr, handleInfo->ip, INET_ADDRSTRLEN);    // get new client ip
@@ -121,8 +130,8 @@ int main(int argc, char* argv[])
 
         // push_lock.lock();
         // 클라이언트 user data 초기화
-        printf("새로운 유저가 입장했습니다 : %s, 현재 유저수 : %d\n", handleInfo->name, user_num + 1);
         UserList[user_num++] = handleInfo;
+        Insertchat("새로운 참가자분이 입장하셨습니다. %d/4", user_num);
         //push_lock.unlock();
 
         // 비동기 입출력 시작
@@ -138,7 +147,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
     DWORD bytesTrans;
     LPPER_HANDLE_DATA handleInfo;
     LPPER_IO_DATA ioInfo;
-    int flags = 0, i, j, n, count;
+    int flags = 0, i, j, n;
     CHAR message[BUF_SIZE], T_message[BUF_SIZE], n_message[BUF_SIZE];
 
     while (1)
@@ -159,12 +168,13 @@ unsigned __stdcall ThreadMain(void* pComPort)
                 {
                     if (UserList[i]->hClntSock == sock) 
                     {
-                        printf("name : %s가 로그아웃함\n", UserList[i]->name);
+                        
                         for (j = i + 1; j <= user_num; j++) 
                         {
                             UserList[j - 1] = UserList[j];
                         }
                         user_num--;
+                        Insertchat("참가자 한분이 퇴장하셨습니다. %d/4", user_num);
                         break;
                     }
                 }
@@ -189,13 +199,11 @@ unsigned __stdcall ThreadMain(void* pComPort)
                 strcpy(code[n], ptr);  
             }
 
-            printf("%s\n", message);
-            //printf("Sock[%d] : %s\n", sock, message);
-
             // 클라이언트가 가진 데이터 구조체의 정보를 바꾼다.
             // 이젠 서버가 쓰기를 행함
             free(ioInfo);
 
+            printf("%s", MakeMessage()); //서버에 메시지 출력
             for (i=0; i<user_num; i++) //클라이언트에 메시지 뿌림
             {
                 ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
@@ -213,15 +221,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
                 int len = strlen(message);
                 ioInfo->wsaBuf.len = len;
-                for (count = 0; count < 20; count++) {//처음 20개 다 찰때까지
-                    strcpy(chat[count], message);
-                }
-                if (count > 20) {
-                    for (i = 0; i < 19; i++) {
-                        strcpy(chat[i], chat[i+1]);//한칸씩 민다
-                    }
-                    strcpy(chat[20], message);
-                }
+                Insertchat(message);
                 ioInfo->wsaBuf.buf = MakeMessage();
 
                 if (WSASend(UserList[i]->hClntSock, &(ioInfo->wsaBuf), 1, &bytesTrans, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
@@ -266,6 +266,25 @@ char* MakeMessage()
 
     return M;
 
+}
+
+void Insertchat(char* M)
+{
+
+    int i;
+
+    //처음 20개 다 찰때까지
+    if (count < 20)
+        strcpy(chat[count++], M);
+
+    else
+    {
+        for (i = 0; i < 19; i++) 
+        {
+            strcpy(chat[i], chat[i + 1]);//한칸씩 민다
+        }
+        strcpy(chat[19], M);
+    }
 }
 
 
