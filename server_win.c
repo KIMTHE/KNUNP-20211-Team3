@@ -5,14 +5,9 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <Ws2tcpip.h> //inet_pton 
-<<<<<<< HEAD
 //#include <mutex>
-=======
-//<<<<<<< HEAD
 //=======
 //#include <mutex>
-//>>>>>>> 7802881377620f46a77d1992f5522df9d749d95d
->>>>>>> ab029cbcbd7d594ee6d9860516f476ba18f1e137
 
 // vs warning and winsock error 
 #pragma comment(lib, "ws2_32.lib")
@@ -143,8 +138,8 @@ unsigned __stdcall ThreadMain(void* pComPort)
     DWORD bytesTrans;
     LPPER_HANDLE_DATA handleInfo;
     LPPER_IO_DATA ioInfo;
-    int flags = 0, i, j;
-    CHAR message[BUF_SIZE];
+    int flags = 0, i, j, n, count;
+    CHAR message[BUF_SIZE], T_message[BUF_SIZE], n_message[BUF_SIZE];
 
     while (1)
     {
@@ -181,7 +176,19 @@ unsigned __stdcall ThreadMain(void* pComPort)
             }
             memcpy(message, ioInfo->wsaBuf.buf, BUF_SIZE);
             message[bytesTrans] = '\0';            // 문자열의 끝에 \0을 추가한다 (쓰레기 버퍼 방지)
-            
+
+            //진짜 메세지 부분 나누기
+            char *ptr = strtok(message, "]");    // [] => ']'기준으로 나눈다.
+            ptr = strtok(NULL, " ");            // ]으로 다시 나눈 message
+            strcpy(T_message, ptr);                // message와 name이 나누어진다.
+            if (strcmp(T_message, "/modify")==0) {
+                ptr = strtok(NULL, " ");
+                strcpy(n_message, ptr);
+                n = atoi(n_message);
+                ptr = strtok(NULL, "]");
+                strcpy(code[n], ptr);  
+            }
+
             printf("%s\n", message);
             //printf("Sock[%d] : %s\n", sock, message);
 
@@ -206,8 +213,16 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
                 int len = strlen(message);
                 ioInfo->wsaBuf.len = len;
-                strcpy(ioInfo->buffer, message);
-                ioInfo->wsaBuf.buf = ioInfo->buffer;
+                for (count = 0; count < 20; count++) {//처음 20개 다 찰때까지
+                    strcpy(chat[count], message);
+                }
+                if (count > 20) {
+                    for (i = 0; i < 19; i++) {
+                        strcpy(chat[i], chat[i+1]);//한칸씩 민다
+                    }
+                    strcpy(chat[20], message);
+                }
+                ioInfo->wsaBuf.buf = MakeMessage();
 
                 if (WSASend(UserList[i]->hClntSock, &(ioInfo->wsaBuf), 1, &bytesTrans, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
                 {
