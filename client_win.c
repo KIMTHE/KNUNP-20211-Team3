@@ -6,7 +6,7 @@
 
 #define BUF_SIZE 100
 #define NAME_SIZE 20
-
+void gotoxy(int x, int y);	//콘솔에서 커서 위치 옮기는 함수
 unsigned WINAPI SendMsg(void * arg);
 unsigned WINAPI RecvMsg(void * arg);
 void ErrorHandling(char * msg);
@@ -65,6 +65,7 @@ unsigned WINAPI SendMsg(void * arg)   // send thread main
 	char nameMsg[NAME_SIZE + BUF_SIZE];
 	while (1)
 	{
+		goto(0, 50);
 		fgets(msg, BUF_SIZE, stdin);
 		if (!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
 		{
@@ -89,7 +90,7 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 		strLen = recv(hSock, nameMsg, NAME_SIZE + BUF_SIZE - 1, 0);
 		if (strLen == -1)
 			return -1;
-
+		/*
 		if (strcmp(nameMsg, "********************\n") == 0) {
 			count++;
 		}	//칸 구분 문자열 검사
@@ -98,6 +99,8 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 			system("cls");
 			count = 0;
 		}	//3번 칸이 구분되면 화면 지우기
+		*/
+		system("cls");
 		nameMsg[strLen] = 0;
 		fputs(nameMsg, stdout);
 	}
@@ -109,4 +112,9 @@ void ErrorHandling(char *msg)
 	fputs(msg, stderr);
 	fputc('\n', stderr);
 	exit(1);
+}
+
+void gotoxy(int x, int y) {
+	COORD pos = { x,y };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
