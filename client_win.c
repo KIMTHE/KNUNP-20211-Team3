@@ -94,7 +94,7 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 			return -1;
 		/*
 		if (strcmp(nameMsg, "********************\n") == 0) {
-			count++;
+			count++;send_max
 		}	//칸 구분 문자열 검사
 
 		if (count == 3) {
