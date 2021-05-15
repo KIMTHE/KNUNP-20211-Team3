@@ -218,7 +218,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
                 
                 ioInfo->rwMode = WRITE;
 
-                int len = strlen(message);
+                int len = strlen(MES);
                 ioInfo->wsaBuf.len = len;
                 ioInfo->wsaBuf.buf = MES;
 
