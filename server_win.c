@@ -5,7 +5,14 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <Ws2tcpip.h> //inet_pton 
+<<<<<<< HEAD
 //#include <mutex>
+=======
+//<<<<<<< HEAD
+//=======
+//#include <mutex>
+//>>>>>>> 7802881377620f46a77d1992f5522df9d749d95d
+>>>>>>> ab029cbcbd7d594ee6d9860516f476ba18f1e137
 
 // vs warning and winsock error 
 #pragma comment(lib, "ws2_32.lib")
