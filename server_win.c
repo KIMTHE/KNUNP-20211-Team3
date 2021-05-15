@@ -190,21 +190,20 @@ unsigned __stdcall ThreadMain(void* pComPort)
             memcpy(message, ioInfo->wsaBuf.buf, BUF_SIZE);
             message[bytesTrans] = '\0';            // 문자열의 끝에 \0을 추가한다 (쓰레기 버퍼 방지)
             Insertchat(message);
-            MakeMessage();
 
             //진짜 메세지 부분 나누기
-            //strcpy(T_message, message);
-            //char *ptr = strtok(T_message, "]");    // [] => ']'기준으로 나눈다.
-            //ptr = strtok(NULL, " ");            // ]으로 다시 나눈 message
-            //strcpy(T_message, ptr);               
-
-            //if (strcmp(T_message, "/modify")==0) {
-            //    ptr = strtok(NULL, " ");
-            //    strcpy(n_message, ptr);
-            //    n = atoi(n_message);
-            //    ptr = strtok(NULL, "]");
-            //    strcpy(code[n], ptr);  
-            //}
+            strcpy(T_message, message);
+            char *ptr = strtok(T_message, "]");    // [] => ']'기준으로 나눈다.
+            ptr = strtok(NULL, " ");            // ]으로 다시 나눈 message
+            strcpy(T_message, ptr);               
+            if (strcmp(T_message, "/modify")==0) {
+                ptr = strtok(NULL, " ");
+                strcpy(n_message, ptr);
+                n = atoi(n_message);
+                ptr = strtok(NULL, "\n");
+                strcpy(code[n-1], ptr);  
+            }
+            MakeMessage();
 
             // 클라이언트가 가진 데이터 구조체의 정보를 바꾼다.
             // 이젠 서버가 쓰기를 행함
