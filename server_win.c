@@ -25,12 +25,12 @@ int PORT_NUM = 50000;
 int READ = 3;
 int WRITE = 5;
 
-char* code_start = "********************\n*******<code>*******\n";
-char* chat_start = "********************\n*******<chat>*******\n";
-char* end = "********************\n";
+char* code_start = "********************\n*******<code>*******\n\n";
+char* chat_start = "********************\n*******<chat>*******\n\n";
+char* end = "********************\n\n";
 
-char chat[20][100];
-char code[20][100];
+char chat[20][100] = {"","","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" };
+char code[20][100] = {"","","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" };
 
 typedef struct    // socket info
 {
@@ -241,6 +241,20 @@ unsigned __stdcall ThreadMain(void* pComPort)
     }
     return 0;
 }
+
+char* MakeMessage()
+{
+    char M[5000];
+
+    sprintf(M,"%s1. %s\n2. %s\n3. %s\n4. %s\n5. %s\n6. %s\n7. %s\n8. %s\n9. %s\n10. %s\n11. %s\n12. %s\n13. %s\n14. %s\n15. %s\n16. %s\n17. %s\n18. %s\n19. %s\n20. %s\n%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+        code_start,code[0], code[1], code[2], code[3], code[4], code[5], code[6], code[7], code[8], code[9], code[10], code[11], code[12], code[13], code[14], code[15], code[16],
+        code[17], code[18], code[19],chat_start,chat[0], chat[1], chat[2], chat[3], chat[4], chat[5], chat[6], chat[7], chat[8], chat[9], chat[10], chat[11], chat[12], chat[13], chat[14], chat[15],
+        chat[16], chat[17], chat[18], chat[19], end );
+
+    return M;
+
+}
+
 
 void ErrorHandling(const char* message)
 {
