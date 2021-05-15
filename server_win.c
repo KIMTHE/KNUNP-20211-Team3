@@ -193,15 +193,17 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
             //진짜 메세지 부분 나누기
             strcpy(T_message, message);
-            char *ptr = strtok(T_message, "]");    // [] => ']'기준으로 나눈다.
-            ptr = strtok(NULL, " ");            // ]으로 다시 나눈 message
+            char *ptr = strtok(T_message, "]");    // [] => ']'기준으로 나눠서 닉네임부분 떼어냄
+            ptr = strtok(NULL, " ");            // " "으로 다시 나눈 message
             strcpy(T_message, ptr);               
-            if (strcmp(T_message, "/modify")==0) {
-                ptr = strtok(NULL, " ");
+            if (strcmp(T_message, "/modify")==0) {//메세지가 /modify로 시작하면 modify 명령어 수행
+                ptr = strtok(NULL, " ");//modify가 몇번째 줄에서 일어나는지 적힌 부분 떼어냄
                 strcpy(n_message, ptr);
                 n = atoi(n_message);
-                ptr = strtok(NULL, "\n");
-                strcpy(code[n-1], ptr);  
+                if (n < 21 && n>0) {//코드부분은 1-20줄 사이
+                    ptr = strtok(NULL, "\n");//수정 내용 떼어냄
+                    strcpy(code[n - 1], ptr);//코드 수정
+                }
             }
             MakeMessage();
 
