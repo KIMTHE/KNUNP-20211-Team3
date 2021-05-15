@@ -6,10 +6,12 @@
 
 #define BUF_SIZE 100
 #define NAME_SIZE 20
-void gotoxy(int x, int y);	//콘솔에서 커서 위치 옮기는 함수
+int port_num = 50000;
+
 unsigned WINAPI SendMsg(void * arg);
 unsigned WINAPI RecvMsg(void * arg);
 void ErrorHandling(char * msg);
+void gotoxy(int x, int y);	//콘솔에서 커서 위치 옮기는 함수
 
 char name[NAME_SIZE] = "[DEFAULT]";
 char msg[BUF_SIZE];
@@ -17,16 +19,12 @@ char msg[BUF_SIZE];
 int main(int argc, char *argv[])
 {
 	char server_ip[20];	//서버 ip 주소
-	char port_num[20];		//서버 포트 번호
 	char user_name[20];	//사용자 이름
 
 	printf("사용할 이름을 입력해주세요 : ");
 	scanf("%s", &user_name);
 	printf("접속할 서버주소를 입력해주세요 : ");
 	scanf(" %s", &server_ip);
-	printf("접속할 포트번호를 입력해주세요 : ");
-	scanf(" %s", &port_num);
-	printf("\n\n");
 
 	WSADATA wsaData;
 	SOCKET hSock;
@@ -42,7 +40,7 @@ int main(int argc, char *argv[])
 	memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family = AF_INET;
 	servAdr.sin_addr.s_addr = inet_addr(server_ip);
-	servAdr.sin_port = htons(atoi(port_num));
+	servAdr.sin_port = htons(port_num);
 
 	if (connect(hSock, (SOCKADDR*)&servAdr, sizeof(servAdr)) == SOCKET_ERROR)
 		ErrorHandling("connect() error");
@@ -65,13 +63,17 @@ unsigned WINAPI SendMsg(void * arg)   // send thread main
 	char nameMsg[NAME_SIZE + BUF_SIZE];
 	while (1)
 	{
-		goto(0, 50);
+		gotoxy(0, 50);
 		fgets(msg, BUF_SIZE, stdin);
 		if (!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
 		{
 			closesocket(hSock);
 			exit(0);
 		}
+
+		else if (strcmp(msg, "\n") == 0)
+			continue;
+
 		sprintf(nameMsg, "%s %s", name, msg);
 		send(hSock, nameMsg, strlen(nameMsg), 0);
 	}
@@ -83,11 +85,11 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 	int count = 0;
 	int i;
 	int hSock = *((SOCKET*)arg);
-	char nameMsg[NAME_SIZE + BUF_SIZE];
+	char nameMsg[5000];
 	int strLen;
 	while (1)
 	{
-		strLen = recv(hSock, nameMsg, NAME_SIZE + BUF_SIZE - 1, 0);
+		strLen = recv(hSock, nameMsg, 5000, 0);
 		if (strLen == -1)
 			return -1;
 		/*

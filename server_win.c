@@ -24,13 +24,14 @@ int PORT_NUM = 50000;
 int READ = 3;
 int WRITE = 5;
 
-char* code_start = "********************\n*******<code>*******\n\n";
-char* chat_start = "********************\n*******<chat>*******\n\n";
-char* end = "********************\n\n";
+char* code_start = "************************\n*********<code>*********\n\n";
+char* chat_start = "************************\n*********<chat>*********\n\n";
+char* end = "************************\n\n";
 
-char chat[20][100] = {"","","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" };
-char code[20][100] = {"","","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" };
+char chat[20][50] = {"","","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" };
+char code[20][50] = {"","","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" };
 int count = 0;
+char MES[5000];
 
 typedef struct    // socket info
 {
@@ -53,7 +54,7 @@ int user_num = 0;
 LPPER_HANDLE_DATA UserList[CLIENT_SIZE];
 
 void ErrorHandling(const char* message);
-char* MakeMessage();
+void MakeMessage();
 void Insertchat(char* M);
 unsigned __stdcall ThreadMain(void* CompletionPortIO);
 
@@ -125,13 +126,12 @@ int main(int argc, char* argv[])
         ioInfo->wsaBuf.buf = ioInfo->buffer;
         ioInfo->rwMode = READ;
 
-        // name 받기
-        recv(handleInfo->hClntSock, handleInfo->name, 20, 0);
-
         // push_lock.lock();
         // 클라이언트 user data 초기화
+        char tmp[50];
         UserList[user_num++] = handleInfo;
-        Insertchat("새로운 참가자분이 입장하셨습니다. %d/4", user_num);
+        sprintf(tmp, "새로운 참가자분이 입장하셨습니다. %d/4\n", user_num);
+        Insertchat(tmp);
         //push_lock.unlock();
 
         // 비동기 입출력 시작
@@ -173,8 +173,11 @@ unsigned __stdcall ThreadMain(void* pComPort)
                         {
                             UserList[j - 1] = UserList[j];
                         }
+
+                        char tmp[50];
                         user_num--;
-                        Insertchat("참가자 한분이 퇴장하셨습니다. %d/4", user_num);
+                        sprintf(tmp, "참가자 한분이 퇴장하셨습니다. %d/4\n", user_num);
+                        Insertchat(tmp);
                         break;
                     }
                 }
@@ -186,24 +189,28 @@ unsigned __stdcall ThreadMain(void* pComPort)
             }
             memcpy(message, ioInfo->wsaBuf.buf, BUF_SIZE);
             message[bytesTrans] = '\0';            // 문자열의 끝에 \0을 추가한다 (쓰레기 버퍼 방지)
+            Insertchat(message);
+            MakeMessage();
 
             //진짜 메세지 부분 나누기
-            char *ptr = strtok(message, "]");    // [] => ']'기준으로 나눈다.
-            ptr = strtok(NULL, " ");            // ]으로 다시 나눈 message
-            strcpy(T_message, ptr);                // message와 name이 나누어진다.
-            if (strcmp(T_message, "/modify")==0) {
-                ptr = strtok(NULL, " ");
-                strcpy(n_message, ptr);
-                n = atoi(n_message);
-                ptr = strtok(NULL, "]");
-                strcpy(code[n], ptr);  
-            }
+            //strcpy(T_message, message);
+            //char *ptr = strtok(T_message, "]");    // [] => ']'기준으로 나눈다.
+            //ptr = strtok(NULL, " ");            // ]으로 다시 나눈 message
+            //strcpy(T_message, ptr);               
+
+            //if (strcmp(T_message, "/modify")==0) {
+            //    ptr = strtok(NULL, " ");
+            //    strcpy(n_message, ptr);
+            //    n = atoi(n_message);
+            //    ptr = strtok(NULL, "]");
+            //    strcpy(code[n], ptr);  
+            //}
 
             // 클라이언트가 가진 데이터 구조체의 정보를 바꾼다.
             // 이젠 서버가 쓰기를 행함
             free(ioInfo);
 
-            printf("%s", MakeMessage()); //서버에 메시지 출력
+            printf("%s", MES); //서버에 메시지 출력
             for (i=0; i<user_num; i++) //클라이언트에 메시지 뿌림
             {
                 ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
@@ -221,8 +228,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
                 int len = strlen(message);
                 ioInfo->wsaBuf.len = len;
-                Insertchat(message);
-                ioInfo->wsaBuf.buf = MakeMessage();
+                ioInfo->wsaBuf.buf = MES;
 
                 if (WSASend(UserList[i]->hClntSock, &(ioInfo->wsaBuf), 1, &bytesTrans, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
                 {
@@ -248,23 +254,22 @@ unsigned __stdcall ThreadMain(void* pComPort)
         // 쓰기 상태
         else 
         {
-            printf("Message Sent!\n");
+            //printf("Message Sent!\n");
             free(ioInfo);
         }
     }
     return 0;
 }
 
-char* MakeMessage()
+void MakeMessage()
 {
-    char M[5000];
-
-    sprintf(M,"%s1. %s\n2. %s\n3. %s\n4. %s\n5. %s\n6. %s\n7. %s\n8. %s\n9. %s\n10. %s\n11. %s\n12. %s\n13. %s\n14. %s\n15. %s\n16. %s\n17. %s\n18. %s\n19. %s\n20. %s\n%s%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s",
+    
+    sprintf(MES,"%s1. %s\n2. %s\n3. %s\n4. %s\n5. %s\n6. %s\n7. %s\n8. %s\n9. %s\n10. %s\n11. %s\n12. %s\n13. %s\n14. %s\n15. %s\n16. %s\n17. %s\n18. %s\n19. %s\n20. %s\n%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
         code_start,code[0], code[1], code[2], code[3], code[4], code[5], code[6], code[7], code[8], code[9], code[10], code[11], code[12], code[13], code[14], code[15], code[16],
         code[17], code[18], code[19],chat_start,chat[0], chat[1], chat[2], chat[3], chat[4], chat[5], chat[6], chat[7], chat[8], chat[9], chat[10], chat[11], chat[12], chat[13], chat[14], chat[15],
         chat[16], chat[17], chat[18], chat[19], end );
 
-    return M;
+    //sprintf(MES,"%s%s",chat[0],chat[1]);
 
 }
 
