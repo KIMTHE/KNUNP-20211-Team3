@@ -93,9 +93,7 @@ int main(int argc, char* argv[])
     {
         source_file = fopen(fname, "r");
 
-		fscanf(source_file, "%d", &count);
-
-        for (i = 0; i < count; i++)
+        for (i = 0; i < 20; i++)
         {
             fgets(code[i], 50,source_file);
         }
@@ -399,6 +397,9 @@ void Insertchat(char* M)
 {
 
 	int i;
+	
+	if (M[strlen(M) - 1] == '\n')
+		M[strlen(M) - 1] == '\0';
 
 	//처음 20개 다 찰때까지
 	if (count < 20)
@@ -447,8 +448,6 @@ void modify_source()
 
 	source_file = fopen(fname, "w");
 
-	fprintf(source_file, "%d\n", count);
-
 	for (i = 0; i < 20; i++)
 		fprintf(source_file, "%s\n", code[i]);
 
@@ -465,7 +464,7 @@ void modify_log()
 	fprintf(log_file, "%d\n", l_count);
 
 	for (i = 0; i < 10; i++)
-		fprintf(log_file, "%s\n", logmessage[i]);
+		fprintf(log_file, "%s", logmessage[i]);
 
 	fclose(log_file);
 }
