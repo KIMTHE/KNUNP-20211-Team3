@@ -110,6 +110,7 @@ int main(int argc, char* argv[])
 	}
 
 	fclose(source_file);
+	fclose(log_file);
 
     // winsock start
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -431,6 +432,8 @@ void modify_source()
 
 	for (i = 0; i < 20; i++)
 		fprintf(source_file, "%s\n", code[i]);
+
+	fclose(source_file);
 }
 
 void modify_log()
@@ -442,4 +445,6 @@ void modify_log()
 
 	for (i = 0; i < 10; i++)
 		fprintf(log_file, "%s\n", logmessage[i]);
+
+	fclose(log_file);
 }
