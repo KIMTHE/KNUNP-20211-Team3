@@ -51,7 +51,20 @@ int main(int argc, char *argv[])
 	if (connect(hSock, (SOCKADDR*)&servAdr, sizeof(servAdr)) == SOCKET_ERROR)
 		ErrorHandling("connect() error");
 
-	sprintf(nameMsg, "%s %s", name, "get_source");
+	//처음 메시지
+	printf("\n\n**************************\n*********<명령어 목록>*********\n");
+	printf("\"/q\" or \"/Q\" : 종료\n");
+	printf("\"modify [줄번호] [수정내용]\" : 내용수정\n");
+	printf("\"delete [줄번호]\" : 내용삭제\n");
+	printf("\"get_log\" : 수정로그파일 받기\n");
+	printf("\"get_source\" : 소스파일 받기\n");
+	printf("**************************\n");
+	printf("\n첫 메시지를 날려주세요 : ");
+	fgets(msg, BUF_SIZE, stdin);
+	sprintf(nameMsg, "%s %s", name, msg);
+	send(hSock, nameMsg, strlen(nameMsg), 0);
+
+	sprintf(nameMsg, "%s %s", name, "/get_source\n");
 	send(hSock, nameMsg, strlen(nameMsg), 0);
 
 	hSndThread =
@@ -74,7 +87,7 @@ unsigned WINAPI SendMsg(void * arg)   // send thread main
 	{
 		gotoxy(0, 50);
 		fgets(msg, BUF_SIZE, stdin);
-		if (!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
+		if (!strcmp(msg, "/q\n") || !strcmp(msg, "/Q\n"))
 		{
 			closesocket(hSock);
 			exit(0);
