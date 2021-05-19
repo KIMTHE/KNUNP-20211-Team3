@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 	system("mode con cols=80 lines=50"); //콘솔 크기 설정
 	char server_ip[20];	//서버 ip 주소
 	char user_name[20];	//사용자 이름
+	char nameMsg[NAME_SIZE + BUF_SIZE];
 
 	printf("사용할 이름을 입력해주세요 : ");
 	scanf("%s", &user_name);
@@ -49,6 +50,9 @@ int main(int argc, char *argv[])
 
 	if (connect(hSock, (SOCKADDR*)&servAdr, sizeof(servAdr)) == SOCKET_ERROR)
 		ErrorHandling("connect() error");
+
+	sprintf(nameMsg, "%s %s", name, "get_source");
+	send(hSock, nameMsg, strlen(nameMsg), 0);
 
 	hSndThread =
 		(HANDLE)_beginthreadex(NULL, 0, SendMsg, (void*)&hSock, 0, NULL);

@@ -96,6 +96,9 @@ int main(int argc, char* argv[])
         for (i = 0; i < 20; i++)
         {
             fgets(code[i], 50,source_file);
+
+			if (code[i][strlen(code[i]) - 1] == '\n')
+				code[i][strlen(code[i]) - 1] == '\0';
         }
 
 		fclose(source_file);
