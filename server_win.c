@@ -95,9 +95,9 @@ int main(int argc, char* argv[])
 
 		fscanf(source_file, "%d", &count);
 
-        for (i = 0; i < 20; i++)
+        for (i = 0; i < count; i++)
         {
-            fscanf(source_file,"%s", code[i]);
+            fgets(code[i], 50,source_file);
         }
 
 		fclose(source_file);
@@ -111,9 +111,9 @@ int main(int argc, char* argv[])
 
 		fscanf(log_file, "%d", &l_count);
 
-		for (i = 0; i < 10; i++)
+		for (i = 0; i < l_count; i++)
 		{
-			fscanf(log_file, "%s", logmessage[i] );
+			fgets(logmessage[i], 50, log_file);
 		}
 
 		fclose(log_file);
@@ -238,7 +238,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
 			memcpy(message, ioInfo->wsaBuf.buf, BUF_SIZE);
 			message[bytesTrans] = '\0';            // 문자열의 끝에 \0을 추가한다 (쓰레기 버퍼 방지)
-			Insertchat(message);
+			
 
 			//진짜 메세지 부분 나누기
 			strcpy(T_message, message);
@@ -259,6 +259,8 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
 				modify_source();
 				modify_log();
+
+				continue;
 			}
 
 			else if (strcmp(T_message, "/delete") == 0) 
@@ -273,6 +275,8 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
 				modify_source();
 				modify_log();
+
+				continue;
 			}
 
 			else if  (strcmp(T_message, "/get_log") == 0) 
@@ -293,6 +297,8 @@ unsigned __stdcall ThreadMain(void* pComPort)
 					if (WSAGetLastError() != WSA_IO_PENDING)
 						ErrorHandling("WSASend() error");
 				}
+
+				continue;
 			}
 
 			else if (strcmp(T_message, "/get_source") == 0)
@@ -313,8 +319,11 @@ unsigned __stdcall ThreadMain(void* pComPort)
 					if (WSAGetLastError() != WSA_IO_PENDING)
 						ErrorHandling("WSASend() error");
 				}
+
+				continue;
 			}
 
+			Insertchat(message);
 			MakeMessage();
 
 			// 클라이언트가 가진 데이터 구조체의 정보를 바꾼다.

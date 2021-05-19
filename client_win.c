@@ -77,7 +77,7 @@ unsigned WINAPI SendMsg(void * arg)   // send thread main
 		}
 
 		else if (strcmp(msg, "\n") == 0)
-			continue;
+			continue;	
 
 		sprintf(nameMsg, "%s %s", name, msg);
 		send(hSock, nameMsg, strlen(nameMsg), 0);
@@ -100,6 +100,7 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 		nameMsg[strLen] = 0;
 		strcpy(message, nameMsg);
 		char* ptr = strtok(message, "\n");    // [] => ']'기준으로 나눠서 닉네임부분 떼어냄
+
 		if (strcmp(ptr, "/get_log")==0)
 		{
 			ptr = strtok(NULL, "\0");
