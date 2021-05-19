@@ -35,6 +35,8 @@ int count = 0;
 int l_count = 0;
 char MES[5000];
 
+FILE* source_file;
+
 typedef struct    // socket info
 {
 	SOCKET hClntSock;
@@ -63,6 +65,7 @@ unsigned __stdcall ThreadMain(void* CompletionPortIO);
 
 int main(int argc, char* argv[])
 {
+<<<<<<< HEAD
 	WSADATA    wsaData;
 	HANDLE hComPort;
 	SYSTEM_INFO sysInfo;
@@ -143,6 +146,108 @@ int main(int argc, char* argv[])
 
 
 	return 0;
+=======
+    system("mode con cols=80 lines=50"); //콘솔 크기 설정
+
+    WSADATA    wsaData;
+    HANDLE hComPort;
+    SYSTEM_INFO sysInfo;
+    LPPER_IO_DATA ioInfo;
+    LPPER_HANDLE_DATA handleInfo;
+
+    SOCKET hServSock;
+    SOCKADDR_IN servAdr;
+    DWORD recvBytes, flags = 0;
+    INT i;
+
+    //파일에서 소스코드 받아옴
+    int exist;
+    char* fname = "source file";
+    
+    exist = access(fname, 0);
+
+    if (exist == 0) //소스파일이 존재할때
+    {
+        source_file = fopen(fname, "r");
+
+        for (i = 0; i < 20; i++)
+        {
+            fscanf();
+        }
+    }
+
+    fclose(source_file);
+    source_file = fopen(fname, "w");
+
+
+    // winsock start
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+        ErrorHandling("WSAStartup Error");
+
+    hComPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+    GetSystemInfo(&sysInfo);
+
+    // main thread와 연결된 thread 생성
+    for (i = 0; i < sysInfo.dwNumberOfProcessors; i++)
+        _beginthreadex(NULL, 0, ThreadMain, (LPVOID)hComPort, 0, NULL);
+
+    // socket 설정
+    hServSock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+    memset(&servAdr, 0, sizeof(servAdr));
+    servAdr.sin_family = AF_INET;
+    servAdr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servAdr.sin_port = htons(PORT_NUM);
+
+    // bind and listen q
+    bind(hServSock, (SOCKADDR*)&servAdr, sizeof(servAdr));
+    listen(hServSock, CLIENT_SIZE);
+
+    while (1)
+    {
+
+        //sock_lock.lock();
+        SOCKET hClntSock;
+        SOCKADDR_IN clntAdr;
+        int addrLen = sizeof(clntAdr);
+
+        hClntSock = accept(hServSock, (SOCKADDR*)&clntAdr, &addrLen);
+
+        if (user_num >= 4)
+        {
+            closesocket(hClntSock);
+            continue;
+        }
+
+        //sock_lock.unlock();
+        handleInfo = (LPPER_HANDLE_DATA)malloc(sizeof(PER_HANDLE_DATA));        // LPPER_HANDLE_DATA 초기화
+        inet_ntop(AF_INET, &clntAdr.sin_addr, handleInfo->ip, INET_ADDRSTRLEN);    // get new client ip
+        handleInfo->hClntSock = hClntSock;                                // 클라이언트의 정보를 구조체에 담아 놓는다.
+        memcpy(&(handleInfo->clntAdr), &clntAdr, addrLen);
+
+        // 소켓 입출력 포트에 accept을 통해서 return 된 클라이언트 정보를 묶는다.
+        CreateIoCompletionPort((HANDLE)hClntSock, hComPort, (DWORD)handleInfo, 0);
+
+        // 클라이언트가 가지게 될 data 초기화
+        ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
+        memset(&(ioInfo->overlapped), 0, sizeof(OVERLAPPED));
+        memset(ioInfo->buffer, 0x00, BUF_SIZE);
+        ioInfo->wsaBuf.len = BUF_SIZE;
+        ioInfo->wsaBuf.buf = ioInfo->buffer;
+        ioInfo->rwMode = READ;
+
+        // push_lock.lock();
+        // 클라이언트 user data 초기화
+        char tmp[50];
+        UserList[user_num++] = handleInfo;
+        sprintf(tmp, "새로운 참가자분이 입장하셨습니다. %d/4\n", user_num);
+        Insertchat(tmp);
+        //push_lock.unlock();
+
+        // 비동기 입출력 시작
+        WSARecv(handleInfo->hClntSock, &(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);
+    }
+    return 0;
+>>>>>>> fa1b1e9603c26b19e45fb5c0e3c687981a4bd6be
 }
 
 unsigned __stdcall ThreadMain(void* pComPort)
