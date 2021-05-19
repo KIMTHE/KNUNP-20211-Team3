@@ -93,6 +93,8 @@ int main(int argc, char* argv[])
     {
         source_file = fopen(fname, "r");
 
+		fscanf(source_file, "%d", &count);
+
         for (i = 0; i < 20; i++)
         {
             fscanf(source_file,"%s", code[i]);
@@ -106,6 +108,8 @@ int main(int argc, char* argv[])
 	if (exist == 0) //로그파일이 존재할때, 파일에서 코드를 받아옴
 	{
 		log_file = fopen(fname2, "r");
+
+		fscanf(log_file, "%d", &l_count);
 
 		for (i = 0; i < 10; i++)
 		{
@@ -433,6 +437,8 @@ void modify_source()
 
 	source_file = fopen(fname, "w");
 
+	fprintf(source_file, "%d\n", count);
+
 	for (i = 0; i < 20; i++)
 		fprintf(source_file, "%s\n", code[i]);
 
@@ -445,6 +451,8 @@ void modify_log()
 	int i;
 
 	log_file = fopen(fname, "w");
+
+	fprintf(log_file, "%d\n", l_count);
 
 	for (i = 0; i < 10; i++)
 		fprintf(log_file, "%s\n", logmessage[i]);
