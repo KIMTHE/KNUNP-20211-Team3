@@ -18,6 +18,7 @@ char msg[BUF_SIZE];
 
 int main(int argc, char *argv[])
 {
+	system("mode con cols=80 lines=50"); //콘솔 크기 설정
 	char server_ip[20];	//서버 ip 주소
 	char user_name[20];	//사용자 이름
 
@@ -92,16 +93,6 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 		strLen = recv(hSock, nameMsg, 5000, 0);
 		if (strLen == -1)
 			return -1;
-		/*
-		if (strcmp(nameMsg, "********************\n") == 0) {
-			count++;send_max
-		}	//칸 구분 문자열 검사
-
-		if (count == 3) {
-			system("cls");
-			count = 0;
-		}	//3번 칸이 구분되면 화면 지우기
-		*/
 		system("cls");
 		nameMsg[strLen] = 0;
 		fputs(nameMsg, stdout);
