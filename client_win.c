@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
 		ErrorHandling("connect() error");
 
 	//처음 메시지
+	getchar();
 	printf("\n\n**************************\n*********<명령어 목록>*********\n");
 	printf("\"/q\" or \"/Q\" : 종료\n");
 	printf("\"modify [줄번호] [수정내용]\" : 내용수정\n");
@@ -62,9 +63,6 @@ int main(int argc, char *argv[])
 	printf("\n첫 메시지를 날려주세요 : ");
 	fgets(msg, BUF_SIZE, stdin);
 	sprintf(nameMsg, "%s %s", name, msg);
-	send(hSock, nameMsg, strlen(nameMsg), 0);
-
-	sprintf(nameMsg, "%s %s", name, "/get_source\n");
 	send(hSock, nameMsg, strlen(nameMsg), 0);
 
 	hSndThread =
