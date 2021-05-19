@@ -1,3 +1,5 @@
+#define _crt_secure_no_warnings
+
 #include <stdio.h>
 #include <stdlib.h>
 #include<string.h>
@@ -95,6 +97,8 @@ int main(int argc, char* argv[])
         {
             fscanf(source_file,"%s", code[i]);
         }
+
+		fclose(source_file);
     }
 
 	exist = access(fname2, 0);
@@ -107,10 +111,9 @@ int main(int argc, char* argv[])
 		{
 			fscanf(log_file, "%s", logmessage[i] );
 		}
-	}
 
-	fclose(source_file);
-	fclose(log_file);
+		fclose(log_file);
+	}
 
     // winsock start
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
