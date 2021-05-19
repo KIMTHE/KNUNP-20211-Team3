@@ -102,19 +102,22 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 		char* ptr = strtok(message, "\n");    // [] => ']'기준으로 나눠서 닉네임부분 떼어냄
 		if (strcmp(ptr, "/get_log")==0)
 		{
-			ptr = strtok(NULL, "\0");
 			log_file = fopen("log file.txt", "w");
-			for (i = 0; i < 10; i++)
-				fprintf(log_file, "%s\n", ptr);
-
+			while (ptr != NULL)              //ptr이 NULL일때까지 (= strtok 함수가 NULL을 반환할때까지)
+			{
+				fprintf(log_file, "%s\n", ptr);         //자른 문자 출력
+				ptr = strtok(NULL, "\n");     //자른 문자 다음부터 구분자 또 찾기
+			}
 			fclose(log_file);
 		}
 		else if (strcmp(ptr, "/get_source") == 0)
 		{
-			ptr = strtok(NULL, "\0");
 			source_file = fopen("source file.txt", "w");
-			for (i = 0; i < 20; i++)
-				fprintf(source_file, "%s\n", ptr);
+			while (ptr != NULL)              //ptr이 NULL일때까지 (= strtok 함수가 NULL을 반환할때까지)
+			{
+				fprintf(source_file, "%s\n", ptr);         //자른 문자 출력
+				ptr = strtok(NULL, "\n");     //자른 문자 다음부터 구분자 또 찾기
+			}
 			fclose(source_file);
 		}
 		else
