@@ -33,6 +33,8 @@ char code[20][50] = {"","","" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"" ,"
 int count = 0;
 char MES[5000];
 
+FILE* source_file;
+
 typedef struct    // socket info
 {
     SOCKET hClntSock;
@@ -60,6 +62,8 @@ unsigned __stdcall ThreadMain(void* CompletionPortIO);
 
 int main(int argc, char* argv[])
 {
+    system("mode con cols=80 lines=50"); //콘솔 크기 설정
+
     WSADATA    wsaData;
     HANDLE hComPort;
     SYSTEM_INFO sysInfo;
@@ -70,6 +74,26 @@ int main(int argc, char* argv[])
     SOCKADDR_IN servAdr;
     DWORD recvBytes, flags = 0;
     INT i;
+
+    //파일에서 소스코드 받아옴
+    int exist;
+    char* fname = "source file";
+    
+    exist = access(fname, 0);
+
+    if (exist == 0) //소스파일이 존재할때
+    {
+        source_file = fopen(fname, "r");
+
+        for (i = 0; i < 20; i++)
+        {
+            fscanf();
+        }
+    }
+
+    fclose(source_file);
+    source_file = fopen(fname, "w");
+
 
     // winsock start
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
