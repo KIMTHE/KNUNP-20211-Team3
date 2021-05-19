@@ -260,7 +260,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 				modify_source();
 				modify_log();
 
-				continue;
+				
 			}
 
 			else if (strcmp(T_message, "/delete") == 0) 
@@ -276,7 +276,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 				modify_source();
 				modify_log();
 
-				continue;
+				
 			}
 
 			else if  (strcmp(T_message, "/get_log") == 0) 
@@ -298,7 +298,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 						ErrorHandling("WSASend() error");
 				}
 
-				continue;
+				
 			}
 
 			else if (strcmp(T_message, "/get_source") == 0)
@@ -320,10 +320,11 @@ unsigned __stdcall ThreadMain(void* pComPort)
 						ErrorHandling("WSASend() error");
 				}
 
-				continue;
+				
 			}
 
-			Insertchat(message);
+			else
+				Insertchat(message);
 			MakeMessage();
 
 			// 클라이언트가 가진 데이터 구조체의 정보를 바꾼다.
