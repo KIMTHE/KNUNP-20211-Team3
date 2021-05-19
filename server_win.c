@@ -6,8 +6,6 @@
 #include <windows.h>
 #include <Ws2tcpip.h> //inet_pton 
 //#include <mutex>
-//=======
-//#include <mutex>
 
 // vs warning and winsock error 
 #pragma comment(lib, "ws2_32.lib")
@@ -16,7 +14,6 @@
 //std::mutex push_lock;
 //std::mutex erase_lock;
 //std::mutex sock_lock;
-
 
 int PORT_NUM = 50000;
 #define BUF_SIZE 1024
@@ -36,6 +33,7 @@ int l_count = 0;
 char MES[5000];
 
 FILE* source_file;
+FILE* log_file;
 
 typedef struct    // socket info
 {
@@ -59,94 +57,16 @@ LPPER_HANDLE_DATA UserList[CLIENT_SIZE];
 
 void ErrorHandling(const char* message);
 void MakeMessage();
+void MakeSource();
+void MakeLog();
 void Insertchat(char* M);
 void Insertlog(char* M);
+void modify_source();
+void modify_log();
 unsigned __stdcall ThreadMain(void* CompletionPortIO);
 
 int main(int argc, char* argv[])
 {
-<<<<<<< HEAD
-	WSADATA    wsaData;
-	HANDLE hComPort;
-	SYSTEM_INFO sysInfo;
-	LPPER_IO_DATA ioInfo;
-	LPPER_HANDLE_DATA handleInfo;
-
-	SOCKET hServSock;
-	SOCKADDR_IN servAdr;
-	DWORD recvBytes, flags = 0;
-	INT i;
-
-	// winsock start
-	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-		ErrorHandling("WSAStartup Error");
-
-	hComPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-	GetSystemInfo(&sysInfo);
-
-	// main thread와 연결된 thread 생성
-	for (i = 0; i < sysInfo.dwNumberOfProcessors; i++)
-		_beginthreadex(NULL, 0, ThreadMain, (LPVOID)hComPort, 0, NULL);
-
-	// socket 설정
-	hServSock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-	memset(&servAdr, 0, sizeof(servAdr));
-	servAdr.sin_family = AF_INET;
-	servAdr.sin_addr.s_addr = htonl(INADDR_ANY);
-	servAdr.sin_port = htons(PORT_NUM);
-
-	// bind and listen q
-	bind(hServSock, (SOCKADDR*)&servAdr, sizeof(servAdr));
-	listen(hServSock, CLIENT_SIZE);
-
-	while (1)
-	{
-
-		//sock_lock.lock();
-		SOCKET hClntSock;
-		SOCKADDR_IN clntAdr;
-		int addrLen = sizeof(clntAdr);
-
-		hClntSock = accept(hServSock, (SOCKADDR*)&clntAdr, &addrLen);
-
-		if (user_num >= 4)
-		{
-			closesocket(hClntSock);
-			continue;
-		}
-
-		//sock_lock.unlock();
-		handleInfo = (LPPER_HANDLE_DATA)malloc(sizeof(PER_HANDLE_DATA));        // LPPER_HANDLE_DATA 초기화
-		inet_ntop(AF_INET, &clntAdr.sin_addr, handleInfo->ip, INET_ADDRSTRLEN);    // get new client ip
-		handleInfo->hClntSock = hClntSock;                                // 클라이언트의 정보를 구조체에 담아 놓는다.
-		memcpy(&(handleInfo->clntAdr), &clntAdr, addrLen);
-
-		// 소켓 입출력 포트에 accept을 통해서 return 된 클라이언트 정보를 묶는다.
-		CreateIoCompletionPort((HANDLE)hClntSock, hComPort, (DWORD)handleInfo, 0);
-
-		// 클라이언트가 가지게 될 data 초기화
-		ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
-		memset(&(ioInfo->overlapped), 0, sizeof(OVERLAPPED));
-		memset(ioInfo->buffer, 0x00, BUF_SIZE);
-		ioInfo->wsaBuf.len = BUF_SIZE;
-		ioInfo->wsaBuf.buf = ioInfo->buffer;
-		ioInfo->rwMode = READ;
-
-		// push_lock.lock();
-		// 클라이언트 user data 초기화
-		char tmp[50];
-		UserList[user_num++] = handleInfo;
-		sprintf(tmp, "새로운 참가자분이 입장하셨습니다. %d/4\n", user_num);
-		Insertchat(tmp);
-		//push_lock.unlock();
-
-		// 비동기 입출력 시작
-		WSARecv(handleInfo->hClntSock, &(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);
-	}
-
-
-	return 0;
-=======
     system("mode con cols=80 lines=50"); //콘솔 크기 설정
 
     WSADATA    wsaData;
@@ -162,23 +82,34 @@ int main(int argc, char* argv[])
 
     //파일에서 소스코드 받아옴
     int exist;
-    char* fname = "source file";
+    char* fname = "source file.txt";
+	char* fname2 = "log file.txt";
     
     exist = access(fname, 0);
 
-    if (exist == 0) //소스파일이 존재할때
+    if (exist == 0) //소스파일이 존재할때, 파일에서 코드를 받아옴
     {
         source_file = fopen(fname, "r");
 
         for (i = 0; i < 20; i++)
         {
-            fscanf();
+            fscanf(source_file,"%s", code[i]);
         }
     }
 
-    fclose(source_file);
-    source_file = fopen(fname, "w");
+	exist = access(fname2, 0);
 
+	if (exist == 0) //로그파일이 존재할때, 파일에서 코드를 받아옴
+	{
+		log_file = fopen(fname2, "r");
+
+		for (i = 0; i < 10; i++)
+		{
+			fscanf(log_file, "%s", logmessage[i] );
+		}
+	}
+
+	fclose(source_file);
 
     // winsock start
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -247,7 +178,7 @@ int main(int argc, char* argv[])
         WSARecv(handleInfo->hClntSock, &(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);
     }
     return 0;
->>>>>>> fa1b1e9603c26b19e45fb5c0e3c687981a4bd6be
+
 }
 
 unsigned __stdcall ThreadMain(void* pComPort)
@@ -270,7 +201,6 @@ unsigned __stdcall ThreadMain(void* pComPort)
 		// 첫 시작은 읽기 상태
 		if (ioInfo->rwMode == READ)
 		{
-			//puts("\nmessage received!");
 			if (bytesTrans == 0) //로그아웃시
 			{
 				//erase_lock.lock();
@@ -297,6 +227,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 				//erase_lock.unlock();
 				continue;
 			}
+
 			memcpy(message, ioInfo->wsaBuf.buf, BUF_SIZE);
 			message[bytesTrans] = '\0';            // 문자열의 끝에 \0을 추가한다 (쓰레기 버퍼 방지)
 			Insertchat(message);
@@ -306,7 +237,9 @@ unsigned __stdcall ThreadMain(void* pComPort)
 			char *ptr = strtok(T_message, "]");    // [] => ']'기준으로 나눠서 닉네임부분 떼어냄
 			ptr = strtok(NULL, " ");            // " "으로 다시 나눈 message
 			strcpy(T_message, ptr);
-			if (strcmp(T_message, "/modify") == 0) {//메세지가 /modify로 시작하면 modify 명령어 수행
+
+			if (strcmp(T_message, "/modify") == 0) 
+			{//메세지가 /modify로 시작하면 modify 명령어 수행
 				Insertlog(message);
 				ptr = strtok(NULL, " ");//modify가 몇번째 줄에서 일어나는지 적힌 부분 떼어냄
 				strcpy(n_message, ptr);
@@ -315,14 +248,62 @@ unsigned __stdcall ThreadMain(void* pComPort)
 					ptr = strtok(NULL, "\n");//수정 내용 떼어냄
 					strcpy(code[n - 1], ptr);//코드 수정
 				}
+
+				modify_source();
+				modify_log();
 			}
-			if (strcmp(T_message, "/delete") == 0) {
+
+			else if (strcmp(T_message, "/delete") == 0) 
+			{
 				Insertlog(message);
 				ptr = strtok(NULL, " ");
 				strcpy(n_message, ptr);
 				n = atoi(n_message);
 				if (n < 21 && n>0) {
 					strcpy(code[n - 1], "");
+				}
+
+				modify_source();
+				modify_log();
+			}
+
+			else if  (strcmp(T_message, "/get_log") == 0) 
+			{
+				free(ioInfo);
+
+				ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
+				memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
+
+				ioInfo->rwMode = WRITE;
+
+				int len = strlen(MES);
+				ioInfo->wsaBuf.len = len;
+				ioInfo->wsaBuf.buf = MES;
+
+				if (WSASend(sock, &(ioInfo->wsaBuf), 1, &bytesTrans, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
+				{
+					if (WSAGetLastError() != WSA_IO_PENDING)
+						ErrorHandling("WSASend() error");
+				}
+			}
+
+			else if (strcmp(T_message, "/get_source") == 0)
+			{
+				free(ioInfo);
+
+				ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
+				memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
+
+				ioInfo->rwMode = WRITE;
+
+				int len = strlen(MES);
+				ioInfo->wsaBuf.len = len;
+				ioInfo->wsaBuf.buf = MES;
+
+				if (WSASend(sock, &(ioInfo->wsaBuf), 1, &bytesTrans, 0, &(ioInfo->overlapped), NULL) == SOCKET_ERROR)
+				{
+					if (WSAGetLastError() != WSA_IO_PENDING)
+						ErrorHandling("WSASend() error");
 				}
 			}
 
@@ -382,9 +363,18 @@ void MakeMessage()
 		code_start, code[0], code[1], code[2], code[3], code[4], code[5], code[6], code[7], code[8], code[9], code[10], code[11], code[12], code[13], code[14], code[15], code[16],
 		code[17], code[18], code[19], chat_start, chat[0], chat[1], chat[2], chat[3], chat[4], chat[5], chat[6], chat[7], chat[8], chat[9], chat[10], chat[11], chat[12], chat[13], chat[14], chat[15],
 		chat[16], chat[17], chat[18], chat[19], end);
+}
 
-	//sprintf(MES,"%s%s",chat[0],chat[1]);
+void MakeSource()
+{
+	sprintf(MES, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", code[0], code[1], code[2], code[3], code[4], code[5], code[6], code[7], code[8], code[9], code[10], code[11], code[12], code[13], code[14], code[15], code[16],
+		code[17], code[18], code[19]);
+}
 
+void MakeLog()
+{
+	sprintf(MES, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", logmessage[0], logmessage[1], logmessage[2], logmessage[3], logmessage[4]
+		, logmessage[5], logmessage[6], logmessage[7], logmessage[8], logmessage[9]);
 }
 
 void Insertchat(char* M)
@@ -430,4 +420,26 @@ void Insertlog(char* M)
 		}
 		strcpy(logmessage[9], M);
 	}
+}
+
+void modify_source()
+{
+	char* fname = "source file.txt";
+	int i;
+
+	source_file = fopen(fname, "w");
+
+	for (i = 0; i < 20; i++)
+		fprintf(source_file, "%s\n", code[i]);
+}
+
+void modify_log()
+{
+	char* fname = "log file.txt";
+	int i;
+
+	log_file = fopen(fname, "w");
+
+	for (i = 0; i < 10; i++)
+		fprintf(log_file, "%s\n", logmessage[i]);
 }
