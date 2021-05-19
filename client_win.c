@@ -15,6 +15,8 @@ void gotoxy(int x, int y);	//콘솔에서 커서 위치 옮기는 함수
 
 char name[NAME_SIZE] = "[DEFAULT]";
 char msg[BUF_SIZE];
+FILE * log_file;
+FILE* source_file;
 
 int main(int argc, char *argv[])
 {
@@ -86,16 +88,38 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 	int count = 0;
 	int i;
 	int hSock = *((SOCKET*)arg);
-	char nameMsg[5000];
+	char nameMsg[5000], message[5000];
 	int strLen;
 	while (1)
 	{
 		strLen = recv(hSock, nameMsg, 5000, 0);
 		if (strLen == -1)
 			return -1;
-		system("cls");
 		nameMsg[strLen] = 0;
-		fputs(nameMsg, stdout);
+		strcpy(message, nameMsg);
+		char* ptr = strtok(message, "\n");    // [] => ']'기준으로 나눠서 닉네임부분 떼어냄
+		if (strcmp(ptr, "/get_log")==0)
+		{
+			ptr = strtok(NULL, "\0");
+			log_file = fopen("log file.txt", "w");
+			for (i = 0; i < 10; i++)
+				fprintf(log_file, "%s\n", ptr);
+
+			fclose(log_file);
+		}
+		else if (strcmp(ptr, "/get_source") == 0)
+		{
+			ptr = strtok(NULL, "\0");
+			source_file = fopen("source file.txt", "w");
+			for (i = 0; i < 20; i++)
+				fprintf(source_file, "%s\n", ptr);
+			fclose(source_file);
+		}
+		else
+		{
+			system("cls");
+			fputs(nameMsg, stdout);
+		}
 	}
 	return 0;
 }
