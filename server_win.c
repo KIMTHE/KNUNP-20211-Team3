@@ -280,7 +280,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 				
 			}
 
-			else if  (strcmp(T_message, "/get_log") == 0) 
+			else if  (strcmp(T_message, "/get_log\n") == 0) 
 			{
 				free(ioInfo);
 
@@ -302,7 +302,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 				
 			}
 
-			else if (strcmp(T_message, "/get_source") == 0)
+			else if (strcmp(T_message, "/get_source\n") == 0)
 			{
 				free(ioInfo);
 
