@@ -240,7 +240,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 			memcpy(message, ioInfo->wsaBuf.buf, BUF_SIZE);
 			message[bytesTrans] = '\0';            // 문자열의 끝에 \0을 추가한다 (쓰레기 버퍼 방지)
 			
-
+			free(ioInfo);
 			//진짜 메세지 부분 나누기
 			strcpy(T_message, message);
 			char *ptr = strtok(T_message, "]");    // [] => ']'기준으로 나눠서 닉네임부분 떼어냄
@@ -249,40 +249,35 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
 			if (strcmp(T_message, "/modify") == 0) 
 			{//메세지가 /modify로 시작하면 modify 명령어 수행
-				Insertlog(message);
 				ptr = strtok(NULL, " ");//modify가 몇번째 줄에서 일어나는지 적힌 부분 떼어냄
 				strcpy(n_message, ptr);
 				n = atoi(n_message);
 				if (n < 21 && n>0) {//코드부분은 1-20줄 사이
+					Insertlog(message);
 					ptr = strtok(NULL, "\n");//수정 내용 떼어냄
 					strcpy(code[n - 1], ptr);//코드 수정
+					modify_source();
+					modify_log();
 				}
-
-				modify_source();
-				modify_log();
 
 				
 			}
 
 			else if (strcmp(T_message, "/delete") == 0) 
 			{
-				Insertlog(message);
 				ptr = strtok(NULL, " ");
 				strcpy(n_message, ptr);
 				n = atoi(n_message);
 				if (n < 21 && n>0) {
+					Insertlog(message);
 					strcpy(code[n - 1], "");
+					modify_source();
+					modify_log();
 				}
-
-				modify_source();
-				modify_log();
-
-				
 			}
 
 			else if  (strcmp(T_message, "/get_log\n") == 0) 
 			{
-				free(ioInfo);
 
 				ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
 				memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
@@ -304,7 +299,6 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
 			else if (strcmp(T_message, "/get_source\n") == 0)
 			{
-				free(ioInfo);
 
 				ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
 				memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
@@ -330,7 +324,6 @@ unsigned __stdcall ThreadMain(void* pComPort)
 
 			// 클라이언트가 가진 데이터 구조체의 정보를 바꾼다.
 			// 이젠 서버가 쓰기를 행함
-			free(ioInfo);
 
 			printf("%s", MES); //서버에 메시지 출력
 			for (i = 0; i < user_num; i++) //클라이언트에 메시지 뿌림
