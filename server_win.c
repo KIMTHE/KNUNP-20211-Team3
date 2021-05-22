@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
     if (exist == 0) //소스파일이 존재할때, 파일에서 코드를 받아옴
     {
         source_file = fopen(fname, "r");
-
+		fgetc(source_file);
         for (i = 0; i < 20; i++)
         {
             fgets(code[i], 50,source_file);
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 		log_file = fopen(fname2, "r");
 
 		fscanf(log_file, "%d", &l_count);
-
+		fgetc(log_file);
 		for (i = 0; i < l_count; i++)
 		{
 			fgets(logmessage[i], 50, log_file);
