@@ -120,6 +120,7 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 
 		if (strcmp(ptr, "/get_log") == 0)
 		{
+			ptr = strtok(NULL, "\n");
 			log_file = fopen("log file.txt", "w");
 			while (ptr != NULL)              //ptr이 NULL일때까지 (= strtok 함수가 NULL을 반환할때까지)
 			{
@@ -130,6 +131,7 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 		}
 		else if (strcmp(ptr, "/get_source") == 0)
 		{
+			ptr = strtok(NULL, "\n");
 			source_file = fopen("source file.txt", "w");
 			while (ptr != NULL)              //ptr이 NULL일때까지 (= strtok 함수가 NULL을 반환할때까지)
 			{
