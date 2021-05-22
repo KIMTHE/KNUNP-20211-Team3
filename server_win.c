@@ -288,7 +288,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 				memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
 
 				ioInfo->rwMode = WRITE;
-
+				MakeLog();
 				int len = strlen(MES);
 				ioInfo->wsaBuf.len = len;
 				ioInfo->wsaBuf.buf = MES;
@@ -310,7 +310,7 @@ unsigned __stdcall ThreadMain(void* pComPort)
 				memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
 
 				ioInfo->rwMode = WRITE;
-
+				MakeSource();
 				int len = strlen(MES);
 				ioInfo->wsaBuf.len = len;
 				ioInfo->wsaBuf.buf = MES;
@@ -386,13 +386,13 @@ void MakeMessage()
 
 void MakeSource()
 {
-	sprintf(MES, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", code[0], code[1], code[2], code[3], code[4], code[5], code[6], code[7], code[8], code[9], code[10], code[11], code[12], code[13], code[14], code[15], code[16],
+	sprintf(MES, "/get_source\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", code[0], code[1], code[2], code[3], code[4], code[5], code[6], code[7], code[8], code[9], code[10], code[11], code[12], code[13], code[14], code[15], code[16],
 		code[17], code[18], code[19]);
 }
 
 void MakeLog()
 {
-	sprintf(MES, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", logmessage[0], logmessage[1], logmessage[2], logmessage[3], logmessage[4]
+	sprintf(MES, "/get_log\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", logmessage[0], logmessage[1], logmessage[2], logmessage[3], logmessage[4]
 		, logmessage[5], logmessage[6], logmessage[7], logmessage[8], logmessage[9]);
 }
 
