@@ -92,7 +92,7 @@ unsigned WINAPI SendMsg(void * arg)   // send thread main
 		}
 
 		else if (strcmp(msg, "\n") == 0)
-			continue;	
+			continue;
 
 		sprintf(nameMsg, "%s %s", name, msg);
 		send(hSock, nameMsg, strlen(nameMsg), 0);
@@ -109,16 +109,17 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 	int strLen;
 	while (1)
 	{
+		gotoxy(0, 50);
 		strLen = recv(hSock, nameMsg, 5000, 0);
+		gotoxy(0, 50);
 		if (strLen == -1)
 			return -1;
 		nameMsg[strLen] = 0;
 		strcpy(message, nameMsg);
 		char* ptr = strtok(message, "\n");    // [] => ']'기준으로 나눠서 닉네임부분 떼어냄
 
-		if (strcmp(ptr, "/get_log")==0)
+		if (strcmp(ptr, "/get_log") == 0)
 		{
-			ptr = strtok(NULL, "\n");
 			log_file = fopen("log file.txt", "w");
 			while (ptr != NULL)              //ptr이 NULL일때까지 (= strtok 함수가 NULL을 반환할때까지)
 			{
@@ -129,7 +130,6 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 		}
 		else if (strcmp(ptr, "/get_source") == 0)
 		{
-			ptr = strtok(NULL, "\n");
 			source_file = fopen("source file.txt", "w");
 			while (ptr != NULL)              //ptr이 NULL일때까지 (= strtok 함수가 NULL을 반환할때까지)
 			{
@@ -141,6 +141,7 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 		else
 		{
 			system("cls");
+			gotoxy(0, 50);
 			fputs(nameMsg, stdout);
 		}
 	}
