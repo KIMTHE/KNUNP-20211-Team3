@@ -58,7 +58,7 @@ void Insertchat(char* M);
 void Insertlog(char* M);
 void modify_source();
 void modify_log();
-unsigned __stdcall ThreadMain(void* CompletionPortIO);
+unsigned __stdcall ChatThreadMain(void* CompletionPortIO);
 
 int main(int argc, char* argv[])
 {
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
     // main thread客 楷搬等 thread 积己
     for (i = 0; i < sysInfo.dwNumberOfProcessors; i++)
-        _beginthreadex(NULL, 0, ThreadMain, (LPVOID)hComPort, 0, NULL);
+        _beginthreadex(NULL, 0, ChatThreadMain, (LPVOID)hComPort, 0, NULL);
 
     // socket 汲沥
     hServSock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
 
 }
 
-unsigned __stdcall ThreadMain(void* pComPort)
+DWORD WINAPI ChatThreadMain(void* pComPort)
 {
 	HANDLE hComPort = (HANDLE)pComPort;
 	SOCKET sock;

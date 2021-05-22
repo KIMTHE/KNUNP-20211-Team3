@@ -109,7 +109,7 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 	int strLen;
 	while (1)
 	{
-		gotoxy(0, 50);
+		gotoxy(0, 50); //커서위치 고정
 		strLen = recv(hSock, nameMsg, 5000, 0);
 		gotoxy(0, 50);
 		if (strLen == -1)
