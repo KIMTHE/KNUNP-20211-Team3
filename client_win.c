@@ -116,12 +116,12 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 			return -1;
 		nameMsg[strLen] = 0;
 		strcpy(message, nameMsg);
-		char* ptr = strtok(message, "\n");    // [] => ']'기준으로 나눠서 닉네임부분 떼어냄
+		char* ptr = strtok(message, "\n");    //\n 기준으로 앞부분 잘라냄
 
-		if (strcmp(ptr, "/get_log") == 0)
+		if (strcmp(ptr, "/get_log") == 0)//클라이언트가 get_log를 요청한경우
 		{
 			ptr = strtok(NULL, "\n");
-			log_file = fopen("log file.txt", "w");
+			log_file = fopen("log file.txt", "w");//로그파일 생성
 			while (ptr != NULL)              //ptr이 NULL일때까지 (= strtok 함수가 NULL을 반환할때까지)
 			{
 				fprintf(log_file, "%s\n", ptr);         //자른 문자 출력
@@ -129,10 +129,10 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 			}
 			fclose(log_file);
 		}
-		else if (strcmp(ptr, "/get_source") == 0)
+		else if (strcmp(ptr, "/get_source") == 0)//클라이언트가 get_source를 요청한경우
 		{
 			ptr = strtok(NULL, "\n");
-			source_file = fopen("source file.txt", "w");
+			source_file = fopen("source file.txt", "w");//소스파일 생성
 			while (ptr != NULL)              //ptr이 NULL일때까지 (= strtok 함수가 NULL을 반환할때까지)
 			{
 				fprintf(source_file, "%s\n", ptr);         //자른 문자 출력
@@ -140,11 +140,11 @@ unsigned WINAPI RecvMsg(void * arg)   // read thread main
 			}
 			fclose(source_file);
 		}
-		else
+		else//일반적인 경우
 		{
-			system("cls");
-			gotoxy(0, 50);
-			fputs(nameMsg, stdout);
+			system("cls");//콘솔 화면 초기화
+			gotoxy(0, 50);//커서 이동
+			fputs(nameMsg, stdout);//출력
 		}
 	}
 	return 0;

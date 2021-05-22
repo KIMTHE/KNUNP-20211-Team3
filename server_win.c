@@ -6,16 +6,9 @@
 #include <process.h>
 #include <winsock2.h>
 #include <windows.h>
-#include <Ws2tcpip.h> //inet_pton 
-//#include <mutex>
-
-// vs warning and winsock error 
+#include <Ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 #pragma warning (disable : 4996)
-
-//std::mutex push_lock;
-//std::mutex erase_lock;
-//std::mutex sock_lock;
 
 int PORT_NUM = 50000;
 #define BUF_SIZE 1024
@@ -138,14 +131,12 @@ int main(int argc, char* argv[])
     servAdr.sin_addr.s_addr = htonl(INADDR_ANY);
     servAdr.sin_port = htons(PORT_NUM);
 
-    // bind and listen q
+    // bind와 listen q
     bind(hServSock, (SOCKADDR*)&servAdr, sizeof(servAdr));
     listen(hServSock, CLIENT_SIZE);
 
     while (1)
     {
-
-        //sock_lock.lock();
         SOCKET hClntSock;
         SOCKADDR_IN clntAdr;
         int addrLen = sizeof(clntAdr);
@@ -158,9 +149,8 @@ int main(int argc, char* argv[])
             continue;
         }
 
-        //sock_lock.unlock();
         handleInfo = (LPPER_HANDLE_DATA)malloc(sizeof(PER_HANDLE_DATA));        // LPPER_HANDLE_DATA 초기화
-        inet_ntop(AF_INET, &clntAdr.sin_addr, handleInfo->ip, INET_ADDRSTRLEN);    // get new client ip
+        inet_ntop(AF_INET, &clntAdr.sin_addr, handleInfo->ip, INET_ADDRSTRLEN);    // new client ip 가져옴
         handleInfo->hClntSock = hClntSock;                                // 클라이언트의 정보를 구조체에 담아 놓는다.
         memcpy(&(handleInfo->clntAdr), &clntAdr, addrLen);
 
@@ -175,13 +165,11 @@ int main(int argc, char* argv[])
         ioInfo->wsaBuf.buf = ioInfo->buffer;
         ioInfo->rwMode = READ;
 
-        // push_lock.lock();
         // 클라이언트 user data 초기화
         char tmp[50];
         UserList[user_num++] = handleInfo;
         sprintf(tmp, "새로운 참가자분이 입장하셨습니다. %d/4\n", user_num);
         Insertchat(tmp);
-        //push_lock.unlock();
 
         // 비동기 입출력 시작
         WSARecv(handleInfo->hClntSock, &(ioInfo->wsaBuf), 1, &recvBytes, &flags, &(ioInfo->overlapped), NULL);
@@ -212,17 +200,14 @@ unsigned __stdcall ThreadMain(void* pComPort)
 		{
 			if (bytesTrans == 0) //로그아웃시
 			{
-				//erase_lock.lock();
 				for (i = 0; i < user_num; i++)
 				{
 					if (UserList[i]->hClntSock == sock)
 					{
-
 						for (j = i + 1; j <= user_num; j++)
 						{
 							UserList[j - 1] = UserList[j];
 						}
-
 						char tmp[50];
 						user_num--;
 						sprintf(tmp, "참가자 한분이 퇴장하셨습니다. %d/4\n", user_num);
@@ -233,7 +218,6 @@ unsigned __stdcall ThreadMain(void* pComPort)
 				closesocket(sock);
 				free(handleInfo);
 				free(ioInfo);
-				//erase_lock.unlock();
 				continue;
 			}
 
@@ -256,14 +240,12 @@ unsigned __stdcall ThreadMain(void* pComPort)
 					Insertlog(message);
 					ptr = strtok(NULL, "\n");//수정 내용 떼어냄
 					strcpy(code[n - 1], ptr);//코드 수정
-					modify_source();
-					modify_log();
+					modify_source();//서버에 저장된 소스파일 수정
+					modify_log();//서버에 저장된 로그파일 수정
 				}
-
-				
 			}
 
-			else if (strcmp(T_message, "/delete") == 0) 
+			else if (strcmp(T_message, "/delete") == 0) //메세지가 /delete로 시작하면 delete 명령어 수행
 			{
 				ptr = strtok(NULL, " ");
 				strcpy(n_message, ptr);
@@ -276,14 +258,13 @@ unsigned __stdcall ThreadMain(void* pComPort)
 				}
 			}
 
-			else if  (strcmp(T_message, "/get_log\n") == 0) 
+			else if  (strcmp(T_message, "/get_log\n") == 0) //클라이언트가 /get_log를 입력
 			{
 
 				ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
 				memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
-
 				ioInfo->rwMode = WRITE;
-				MakeLog();
+				MakeLog();//클라이언트에게 보낼 로그파일 생성
 				int len = strlen(MES);
 				ioInfo->wsaBuf.len = len;
 				ioInfo->wsaBuf.buf = MES;
@@ -293,18 +274,16 @@ unsigned __stdcall ThreadMain(void* pComPort)
 					if (WSAGetLastError() != WSA_IO_PENDING)
 						ErrorHandling("WSASend() error");
 				}
-
-				
 			}
 
-			else if (strcmp(T_message, "/get_source\n") == 0)
+			else if (strcmp(T_message, "/get_source\n") == 0)//클라이언트가 /get_source를 입력
 			{
 
 				ioInfo = (LPPER_IO_DATA)malloc(sizeof(PER_IO_DATA));
 				memset(&(ioInfo->overlapped), 0x00, sizeof(OVERLAPPED));
 
 				ioInfo->rwMode = WRITE;
-				MakeSource();
+				MakeSource();//클라이언트에게 보낼 소스파일 생성
 				int len = strlen(MES);
 				ioInfo->wsaBuf.len = len;
 				ioInfo->wsaBuf.buf = MES;
@@ -314,13 +293,11 @@ unsigned __stdcall ThreadMain(void* pComPort)
 					if (WSAGetLastError() != WSA_IO_PENDING)
 						ErrorHandling("WSASend() error");
 				}
-
-				
 			}
-
 			else
-				Insertchat(message);
-			MakeMessage();
+				Insertchat(message);//클라이언트에게 받은 채팅 채팅배열에 추가
+
+			MakeMessage();//클라이언트에게 보낼 메세지 생성
 
 			// 클라이언트가 가진 데이터 구조체의 정보를 바꾼다.
 			// 이젠 서버가 쓰기를 행함
@@ -361,37 +338,34 @@ unsigned __stdcall ThreadMain(void* pComPort)
 		// 쓰기 상태
 		else
 		{
-			//printf("Message Sent!\n");
 			free(ioInfo);
 		}
 	}
 	return 0;
 }
 
-void MakeMessage()
+void MakeMessage()//클라이언트에게 보낼 내용을 코드, 채팅 더해서 생성
 {
-
 	sprintf(MES, "%s1. %s\n2. %s\n3. %s\n4. %s\n5. %s\n6. %s\n7. %s\n8. %s\n9. %s\n10. %s\n11. %s\n12. %s\n13. %s\n14. %s\n15. %s\n16. %s\n17. %s\n18. %s\n19. %s\n20. %s\n%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 		code_start, code[0], code[1], code[2], code[3], code[4], code[5], code[6], code[7], code[8], code[9], code[10], code[11], code[12], code[13], code[14], code[15], code[16],
 		code[17], code[18], code[19], chat_start, chat[0], chat[1], chat[2], chat[3], chat[4], chat[5], chat[6], chat[7], chat[8], chat[9], chat[10], chat[11], chat[12], chat[13], chat[14], chat[15],
 		chat[16], chat[17], chat[18], chat[19], end);
 }
 
-void MakeSource()
+void MakeSource()// 코드내용 더해서 생성
 {
 	sprintf(MES, "/get_source\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", code[0], code[1], code[2], code[3], code[4], code[5], code[6], code[7], code[8], code[9], code[10], code[11], code[12], code[13], code[14], code[15], code[16],
 		code[17], code[18], code[19]);
 }
 
-void MakeLog()
+void MakeLog()// 로그내용 더해서 생성
 {
 	sprintf(MES, "/get_log\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", logmessage[0], logmessage[1], logmessage[2], logmessage[3], logmessage[4]
 		, logmessage[5], logmessage[6], logmessage[7], logmessage[8], logmessage[9]);
 }
 
-void Insertchat(char* M)
+void Insertchat(char* M)//채팅 배열에 M 추가
 {
-
 	int i;
 	
 	if (M[strlen(M) - 1] == '\n')
@@ -418,7 +392,7 @@ void ErrorHandling(const char* message)
 	exit(1);
 }
 
-void Insertlog(char* M)
+void Insertlog(char* M)//로그 배열에 M 추가
 {
 
 	int i;
@@ -437,7 +411,7 @@ void Insertlog(char* M)
 	}
 }
 
-void modify_source()
+void modify_source()//서버에 저장된 소스파일 업데이트
 {
 	char* fname = "source file.txt";
 	int i;
@@ -450,7 +424,7 @@ void modify_source()
 	fclose(source_file);
 }
 
-void modify_log()
+void modify_log()//서버에 저장된 로그 파일 업데이트
 {
 	char* fname = "log file.txt";
 	int i;
