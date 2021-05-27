@@ -58,7 +58,7 @@ void Insertchat(char* M);
 void Insertlog(char* M);
 void modify_source();
 void modify_log();
-unsigned __stdcall ChatThreadMain(void* CompletionPortIO);
+DWORD WINAPI ChatThreadMain(void* CompletionPortIO);
 
 int main(int argc, char* argv[])
 {
