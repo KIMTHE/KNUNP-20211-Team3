@@ -51,14 +51,14 @@ int user_num = 0;
 LPPER_HANDLE_DATA UserList[CLIENT_SIZE];
 
 void ErrorHandling(const char* message);
-void MakeMessage();
-void MakeSource();
-void MakeLog();
-void Insertchat(char* M);
-void Insertlog(char* M);
-void modify_source();
-void modify_log();
-unsigned __stdcall ChatThreadMain(void* CompletionPortIO);
+void MakeMessage();//클라이언트에게 보낼 내용(코드+채팅 합친것)을 생성
+void MakeSource();//클라이언트가 소스코드 받기를 요청한 상태로 내용(코드)을 생성
+void MakeLog();//클라이언트가 로그 받기를 요청한 상태로 내용(로그)을 생성
+void Insertchat(char* M);//클라이언트에게 입력받은 채팅내용을 채팅 배열에 추가
+void Insertlog(char* M);//클라이언트가 수정, 삭제를 요청한 경우 이러한 기록을 로그 배열에 추가
+void modify_source();//서버의 데이터베이스(코드부분)을 수정
+void modify_log();//서버의 데이터베이스(로그부분)을 수정
+DWORD WINAPI ChatThreadMain(void* CompletionPortIO);
 
 int main(int argc, char* argv[])
 {
@@ -85,7 +85,6 @@ int main(int argc, char* argv[])
     if (exist == 0) //소스파일이 존재할때, 파일에서 코드를 받아옴
     {
         source_file = fopen(fname, "r");
-		fgetc(source_file);
         for (i = 0; i < 20; i++)
         {
             fgets(code[i], 50,source_file);

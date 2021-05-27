@@ -10,10 +10,10 @@
 #define NAME_SIZE 20
 int port_num = 50000;
 
-unsigned WINAPI SendMsg(void * arg);
-unsigned WINAPI RecvMsg(void * arg);
+unsigned WINAPI SendMsg(void * arg);//클라언트가 입력한 것을 서버에게 전송
+unsigned WINAPI RecvMsg(void * arg);//서버가 전송한 내용을 받아서 출력, /get_code, /get_souce를 직전에 보냈었을 경우 해당 명령어도 같이 받아서 할 행동을 구분한다.
 void ErrorHandling(char * msg);
-void gotoxy(int x, int y);	//콘솔에서 커서 위치 옮기는 함수
+void gotoxy(int x, int y);	//콘솔에서 채팅 입력 커서 위치 옮기는 함수
 
 char name[NAME_SIZE] = "[DEFAULT]";
 char msg[BUF_SIZE];
